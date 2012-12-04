@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>test</groupId>
+    <artifactId>vaadin-dontpush-test</artifactId>
+    <packaging>war</packaging>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <properties>
+        <ver.gwt>2.4.0</ver.gwt>
+        <ver.gwt.plugin>${ver.gwt}</ver.gwt.plugin>
+        <ver.openlayers>1.2.0</ver.openlayers>
+        <ver.vaadin>6.8.5</ver.vaadin>
+        <ver.vaadin-maven-plugin>1.0.2</ver.vaadin-maven-plugin>
+        <ver.gwt-incubator>2.0.1</ver.gwt-incubator>
+        <ver.dontpush-ozonelayer>1.0.3</ver.dontpush-ozonelayer>
+    </properties>
+
+    <profiles>
+        <!-- turn on all optimizations on production -->
+        <profile>
+            <id>production</id>
+            <properties>
+                <skipTests>true</skipTests>
+                <skipVersionsCheck>true</skipVersionsCheck>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <configuration>
+                            <draftCompile>false</draftCompile>
+                            <optimizationLevel>9</optimizationLevel>
+                            <style>OBF</style>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+
+                            <!-- TODO: this is a workaround!
+                                 remove when http://jira.codehaus.org/browse/MDEP-348
+                                 will be fixed -->
+                            <includeClassifiers>nonexistent</includeClassifiers>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <!-- Compile custom GWT components or
+                 widget dependencies with the GWT
+                 compiler -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <version>${ver.gwt.plugin}</version>
+                <configuration>
+                    <webappDirectory>${project.build.directory}/${project.build.finalName}/VAADIN/widgetsets
+                    </webappDirectory>
+                    <extraJvmArgs>-Xmx512M -Xss1024k</extraJvmArgs>
+                    <runTarget>otr-webgui</runTarget>
+                    <hostedWebapp>${project.build.directory}/${project.build.finalName}</hostedWebapp>
+                    <noServer>true</noServer>
+                    <port>8080</port>
+                    <compileReport>false</compileReport>
+                    <logLevel>INFO</logLevel>
+
+                    <strict>true</strict>
+                    <localWorkers>2</localWorkers>
+                    <optimizationLevel>0</optimizationLevel>
+                    <draftCompile>true</draftCompile>
+                    <style>PRETTY</style>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>resources</goal>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.google.gwt</groupId>
+                        <artifactId>gwt-dev</artifactId>
+                        <version>${ver.gwt}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-maven-plugin</artifactId>
+                <version>${ver.vaadin-maven-plugin}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>update-widgetset</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- A simple Jetty test server at http://localhost:8080/otr-webgui
+                 can be launched with the Maven goal jetty:run
+                 and stopped with jetty:stop -->
+            <!--plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>maven-jetty-plugin</artifactId>
+                <version>6.1.24</version>
+                <configuration>
+                    <stopPort>9966</stopPort>
+                    <stopKey>otr-webgui</stopKey>
+                    <!- - Redeploy every x seconds if changes are detected, 0 for no automatic redeployment - ->
+                    <scanIntervalSeconds>0</scanIntervalSeconds>
+                    <!- - make sure Jetty also finds the widgetset - ->
+                    <webAppConfig>
+                        <contextPath>/otr-webgui</contextPath>
+                        <baseResource implementation="org.mortbay.resource.ResourceCollection">
+                            <!- - Workaround for Maven/Jetty issue http://jira.codehaus.org/browse/JETTY-680 - ->
+                            <!- - <resources>src/main/webapp,${project.build.directory}/${project.build.finalName}</resources> - ->
+                            <resourcesAsCSV>src/main/webapp,${project.build.directory}/${project.build.finalName}
+                            </resourcesAsCSV>
+                        </baseResource>
+                    </webAppConfig>
+                </configuration>
+            </plugin-->
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>vaadin-snapshots</id>
+            <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>vaadin-addons</id>
+            <url>http://maven.vaadin.com/vaadin-addons</url>
+        </repository>
+    </repositories>
+
+    <!--
+    <pluginRepositories>
+        <pluginRepository>
+            <id>codehaus-snapshots</id>
+            <url>http://nexus.codehaus.org/snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
+        <pluginRepository>
+            <id>vaadin-snapshots</id>
+            <url>http://oss.sonatype.org/content/repositories/vaadin-snapshots/</url>
+            <snapshots>
+               <enabled>true</enabled>
+            </snapshots>
+            <releases>
+               <enabled>false</enabled>
+            </releases>
+        </pluginRepository>
+    </pluginRepositories>
+    -->
+
+    <dependencies>
+         <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${ver.gwt}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-servlet</artifactId>
+            <version>${ver.gwt}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.vaadin</groupId>
+            <artifactId>dontpush-addon-ozonelayer</artifactId>
+            <version>${ver.dontpush-ozonelayer}</version>
+            <exclusions>
+                <!-- to honor enforcer rules -->
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!--dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-websocket</artifactId>
+            <version>8.1.0.RC5</version>
+        </dependency-->
+
+        <dependency> <!-- Not available for 7 -->
+            <groupId>org.vaadin.vol</groupId>
+            <artifactId>openlayers-wrapper</artifactId>
+            <version>${ver.openlayers}</version>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>vaadin</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-incubator</artifactId>
+            <version>${ver.gwt-incubator}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin</artifactId>
+            <version>${ver.vaadin}</version>
+        </dependency>
+        <!--
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <version>${ver.gwt}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>1.0.0.GA</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>1.0.0.GA</version>
+            <classifier>sources</classifier>
+            <scope>provided</scope>
+        </dependency>
+        -->
+    </dependencies>
+</project>

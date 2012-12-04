@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context antiJARLocking="true">
+    <Loader delegate="true"/>
+
+    <!-- tomcat: write the following Environment tag into
+        /etc/tomcat-XXX/context.xml or other suitable context -->
+
+    <!--Environment
+        name="otr-webgui/config/spring"
+        value="/etc/otr/webgui/webgui-context.xml"
+        type="java.lang.String"
+        override="true"
+    /-->
+</Context>
