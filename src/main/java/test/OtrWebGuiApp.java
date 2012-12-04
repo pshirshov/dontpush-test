@@ -21,9 +21,10 @@ public final class OtrWebGuiApp extends Application {
 
 
         final List<Button> buttons = new ArrayList<>();
-        for (int c = 0; c < 50; ++c) {
+        for (int c = 0; c < 10; ++c) {
             final Button btnTest = new Button();
             btnTest.setCaption("Btn"+c);
+            btnTest.setDescription(""+c);
             w.addComponent(btnTest);
             buttons.add(btnTest);
 
@@ -39,14 +40,15 @@ public final class OtrWebGuiApp extends Application {
                 int c = 0;
                 while (true) {
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(50);
                     } catch (InterruptedException e) {
                         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                     }
                     final String caption = "c=" + c;
 
                     for (final Button b:buttons) {
-                        b.setCaption(caption);
+                        b.setCaption(b.getDescription()+":"+caption);
+                        b.requestRepaint();
                     }
                     System.err.println(caption+"; thread="+Thread.currentThread().getId());
                     ++c;
